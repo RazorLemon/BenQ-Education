@@ -1,0 +1,329 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  LATE
+}
+
+enum EventType {
+  HOLIDAY
+  EXAM
+  EVENT
+  ASSIGNMENT
+  MEETING
+  ANNOUNCEMENT
+  TEST
+  QUIZ
+}
+
+enum EventScope {
+  SCHOOL
+  CLASS
+  TEACHER
+}
+
+model School {
+  id   String @id @default(uuid())
+  name String
+  code String @unique
+
+  users    User[]
+  teachers Teacher[]
+  students Student[]
+  classes  Class[]
+  activityLogs ActivityLog[]
+  calendarEvents CalendarEvent[]
+  settings SchoolSetting?
+
+  createdAt DateTime @default(now())
+}
+
+model SchoolSetting {
+  id String @id @default(uuid())
+
+  schoolId String @unique
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  saturdayOff Boolean @default(true)
+  calendarDefaultView String @default("week")
+
+  cacheEnabled Boolean @default(true)
+  cacheTtlSeconds Int @default(60)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String @id @default(uuid())
+  name         String
+  email        String
+  passwordHash String
+  role         Role
+
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id])
+
+  teacher Teacher?
+  student Student?
+  classComments ClassComment[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([schoolId, email])
+}
+
+model Teacher {
+  id String @id @default(uuid())
+
+  employeeId String
+
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id])
+
+  userId String @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  classes Class[]
+
+  permissions TeacherPermission?
+
+  @@unique([schoolId, employeeId])
+}
+
+model Student {
+  id String @id @default(uuid())
+
+  rollNumber String
+  classSection String @default("")
+
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id])
+
+  userId String @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  enrollments Enrollment[]
+
+  submissions Submission[]
+
+  @@unique([schoolId, rollNumber])
+}
+
+model TeacherPermission {
+  id String @id @default(uuid())
+
+  teacherId String @unique
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  canCreateStudents Boolean @default(false)
+  canCreateClasses Boolean @default(false)
+  canEnrollStudents Boolean @default(false)
+  canManageCalendar Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Class {
+  id String @id @default(uuid())
+
+  name String
+  code String
+  subject String
+  year Int
+
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id])
+
+  teacherId String
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  enrollments Enrollment[]
+
+  assignments Assignment[]
+
+  announcements Announcement[]
+  comments ClassComment[]
+  calendarEventClasses CalendarEventClass[]
+
+  @@unique([schoolId, code])
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+
+  classId   String
+  studentId String
+
+  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@unique([classId, studentId])
+}
+
+model Assignment {
+  id String @id @default(uuid())
+
+  title String
+  description String
+
+  attachmentUrl String?
+  attachmentName String?
+
+  dueDate DateTime
+
+  isPublished Boolean @default(true)
+
+  classId String
+  class Class @relation(fields: [classId], references: [id])
+
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+}
+
+model Submission {
+  id String @id @default(uuid())
+
+  assignmentId String
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+
+  fileUrl String?
+  fileName String?
+
+  submittedAt DateTime?
+
+  grade Float?
+
+  feedback String?
+
+  status SubmissionStatus @default(SUBMITTED)
+
+  createdAt DateTime @default(now())
+
+  @@unique([assignmentId, studentId])
+}
+
+model Announcement {
+  id String @id @default(uuid())
+
+  title String
+
+  content String
+
+  createdAt DateTime @default(now())
+
+  classId String
+  class Class @relation(fields: [classId], references: [id])
+}
+
+model CalendarEvent {
+  id String @id @default(uuid())
+
+  title String
+  description String?
+
+  startDate DateTime
+  endDate DateTime
+
+  eventType EventType
+  scope EventScope @default(SCHOOL)
+
+  schoolId String?
+  school School? @relation(fields: [schoolId], references: [id])
+
+  createdBy String?
+
+  classes CalendarEventClass[]
+
+  createdAt DateTime @default(now())
+
+  @@index([schoolId, startDate])
+}
+
+model CalendarEventClass {
+  id String @id @default(uuid())
+
+  eventId String
+  event CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  classId String
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, classId])
+  @@index([classId])
+}
+
+model ActivityLog {
+  id String @id @default(uuid())
+
+  schoolId String?
+  school School? @relation(fields: [schoolId], references: [id])
+
+  action String
+  message String
+
+  actorRole String?
+  actorId String?
+
+  studentId String?
+  studentName String?
+  rollNumber String?
+
+  classId String?
+  classSection String?
+  subject String?
+
+  assignmentId String?
+  assignmentTitle String?
+
+  fileName String?
+
+  createdAt DateTime @default(now())
+
+  @@index([schoolId, action, createdAt])
+  @@index([classId, createdAt])
+  @@index([studentId, createdAt])
+}
+
+model ClassComment {
+  id String @id @default(uuid())
+
+  content String
+  pinned Boolean @default(false)
+
+  classId String
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent ClassComment? @relation("ClassCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies ClassComment[] @relation("ClassCommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([classId, pinned, createdAt])
+  @@index([parentId, createdAt])
+}

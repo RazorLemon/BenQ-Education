@@ -226,6 +226,35 @@ function StudentClassDetails(){
 
  }
 
+ const classAssignments =
+  data.class.assignments || [];
+
+ const classAssignmentIds =
+  new Set(
+   classAssignments.map(
+    assignment=>assignment.id
+   )
+  );
+
+ const classSubmissions =
+  (data.submissions || [])
+   .filter(
+    submission=>
+     classAssignmentIds.has(
+      submission.assignmentId
+     )
+   );
+
+ const submittedCount =
+  classSubmissions.length;
+
+ const pendingCount =
+  Math.max(
+   classAssignments.length -
+   submittedCount,
+   0
+  );
+
  return(
 
   <StudentLayout
@@ -344,7 +373,7 @@ function StudentClassDetails(){
 
     <StatCard
      title="Assignments"
-     value={data.class.assignments.length}
+     value={classAssignments.length}
      subtitle="Published work in this subject"
      icon={BookOpen}
      actionLabel="View assignments"
@@ -355,7 +384,7 @@ function StudentClassDetails(){
 
     <StatCard
      title="Submitted"
-     value={data.submissions.length}
+     value={submittedCount}
      subtitle="Assignments you have turned in"
      icon={CheckCircle2}
      actionLabel="Review submissions"
@@ -366,10 +395,7 @@ function StudentClassDetails(){
 
     <StatCard
      title="Pending"
-     value={
-      data.class.assignments.length -
-      data.submissions.length
-     }
+     value={pendingCount}
      subtitle="Assignments still needing action"
      icon={FileWarning}
      actionLabel="Open pending work"
@@ -431,11 +457,11 @@ function StudentClassDetails(){
 
      {
 
-      data.class.assignments.map(
+      classAssignments.map(
        assignment=>{
 
         const submission =
-         data.submissions.find(
+         classSubmissions.find(
           s=>
            s.assignmentId ===
            assignment.id

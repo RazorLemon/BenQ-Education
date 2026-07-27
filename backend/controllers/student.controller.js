@@ -1142,7 +1142,10 @@ async (req,res)=>{
    await prisma.submission.findMany({
 
     where:{
-     studentId:student.id
+     studentId:student.id,
+     assignment:{
+      classId:id
+     }
     }
 
    });

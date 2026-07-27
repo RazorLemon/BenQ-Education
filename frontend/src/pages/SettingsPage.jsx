@@ -8,7 +8,6 @@ from "react";
 
 import {
  CalendarDays,
- Database,
  KeyRound,
  Save,
  School,
@@ -26,9 +25,6 @@ from "../layouts/AdminLayout";
 
 import TeacherLayout
 from "../layouts/TeacherLayout";
-
-import StudentLayout
-from "../layouts/StudentLayout";
 
 import PageHeader
 from "../components/ui/PageHeader";
@@ -51,14 +47,12 @@ from "../context/auth-context";
 
 const layoutByRole = {
  ADMIN:AdminLayout,
- TEACHER:TeacherLayout,
- STUDENT:StudentLayout
+ TEACHER:TeacherLayout
 };
 
 const endpointByRole = {
  ADMIN:"/admin/settings",
- TEACHER:"/teacher/settings",
- STUDENT:"/student/settings"
+ TEACHER:"/teacher/settings"
 };
 
 const viewLabels = {
@@ -184,13 +178,8 @@ function SettingsPage() {
    schoolName:"",
    schoolCode:"",
    saturdayOff:true,
-   calendarDefaultView:"week",
-   cacheEnabled:true,
-   cacheTtlSeconds:60
+   calendarDefaultView:"week"
   });
-
- const [runtime,setRuntime] =
-  useState(null);
 
  const title =
   useMemo(
@@ -222,16 +211,8 @@ function SettingsPage() {
       saturdayOff:
        response.data.calendar?.saturdayOff ?? true,
       calendarDefaultView:
-       response.data.calendar?.defaultView || "week",
-      cacheEnabled:
-       response.data.cache?.enabled ?? true,
-      cacheTtlSeconds:
-       response.data.cache?.ttlSeconds || 60
+       response.data.calendar?.defaultView || "week"
      });
-
-     setRuntime(
-      response.data.cache || null
-     );
     }catch(error){
      console.error(error);
     }finally{
@@ -268,14 +249,9 @@ function SettingsPage() {
    try{
     setSaving(true);
 
-    const response =
-     await api.put(
-      endpoint,
-      form
-     );
-
-    setRuntime(
-     response.data.cache || null
+    await api.put(
+     endpoint,
+     form
     );
 
     notifySuccess(
@@ -405,47 +381,6 @@ function SettingsPage() {
        </label>
       </div>
      </SettingsSection>
-
-     <SettingsSection
-      icon={Database}
-      title="Read Cache"
-     >
-      <div className="space-y-4">
-       <Toggle
-        checked={form.cacheEnabled}
-        disabled={!editable}
-        onChange={(value)=>
-         updateField(
-          "cacheEnabled",
-          value
-         )
-        }
-        label="Enable Redis caching"
-        description="Repeated dashboard, analytics, calendar, and list reads can be served from Redis."
-       />
-
-       <label className="block">
-        <span className="text-sm font-semibold text-gray-700">
-         Cache TTL seconds
-        </span>
-
-        <input
-         type="number"
-         min="5"
-         max="3600"
-         value={form.cacheTtlSeconds}
-         disabled={!editable || !form.cacheEnabled}
-         onChange={(event)=>
-          updateField(
-           "cacheTtlSeconds",
-           Number(event.target.value)
-          )
-         }
-         className="mt-1 h-11 w-full rounded-xl border border-gray-200 px-3 outline-none focus:border-[#008C95] disabled:bg-gray-50 disabled:text-gray-500"
-        />
-       </label>
-      </div>
-     </SettingsSection>
     </div>
 
     <aside className="space-y-5">
@@ -471,33 +406,7 @@ function SettingsPage() {
          {viewLabels[form.calendarDefaultView]}
         </dd>
        </div>
-
-       <div className="flex items-center justify-between gap-3">
-        <dt className="text-gray-500">
-         Redis cache
-        </dt>
-        <dd className="font-bold text-gray-900">
-         {form.cacheEnabled ? "Enabled" : "Disabled"}
-        </dd>
-       </div>
-
-       <div className="flex items-center justify-between gap-3">
-        <dt className="text-gray-500">
-         TTL
-        </dt>
-        <dd className="font-bold text-gray-900">
-         {form.cacheTtlSeconds}s
-        </dd>
-       </div>
       </dl>
-
-      {
-       runtime && (
-        <p className="mt-4 rounded-xl bg-gray-50 p-3 text-xs text-gray-500">
-         If a school has no saved setting yet, the backend falls back to {runtime.fallbackEnabled ? "enabled" : "disabled"} caching with a {runtime.fallbackTtlSeconds}s TTL.
-        </p>
-       )
-      }
      </SettingsSection>
 
      <SettingsSection

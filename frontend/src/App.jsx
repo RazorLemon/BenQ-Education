@@ -353,16 +353,6 @@ function App() {
 />
 
 <Route
- path="/student/settings"
- element={
-  protectedElement(
-   <SettingsPage />,
-   ["STUDENT"]
-  )
- }
-/>
-
-<Route
   path="/teacher/classes"
   element={
    protectedElement(

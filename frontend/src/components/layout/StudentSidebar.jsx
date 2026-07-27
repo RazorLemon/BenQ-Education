@@ -3,8 +3,7 @@ import {
  BookOpen,
  BarChart3,
  Megaphone,
- User,
- Settings
+ User
 }
 from "lucide-react";
 
@@ -160,15 +159,6 @@ function StudentSidebar({
     >
      <User />
      Profile
-    </NavLink>
-
-    <NavLink
-     to="/student/settings"
-     className={linkClass}
-     onClick={onNavigate}
-    >
-     <Settings />
-     Settings
     </NavLink>
 
    </nav>

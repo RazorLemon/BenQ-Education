@@ -22,12 +22,7 @@ import {
  YAxis,
  Tooltip,
  CartesianGrid,
- Legend,
- RadarChart,
- PolarGrid,
- PolarAngleAxis,
- PolarRadiusAxis,
- Radar
+ Legend
 }
 from "recharts";
 
@@ -215,7 +210,7 @@ function StudentGrades(){
 
  const focusedPeerRows =
   selectedAssignment
-  ? selectedAssignment.peerRows
+  ? (selectedAssignment.peerRows || [])
     .map((row)=>({
      id:row.id,
      studentName:row.studentName,
@@ -225,7 +220,7 @@ function StudentGrades(){
     }))
   : subjectFilter !== "all" &&
     selectedSubject
-  ? selectedSubject.peerRows
+  ? selectedSubject.peerRows || []
   : data?.overallPeerRows || [];
 
  const focusedAverage =
@@ -263,8 +258,8 @@ function StudentGrades(){
  const assignmentChart =
   filteredAssignments
    .map((item)=>({
-    name:item.assignmentTitle,
-    subject:item.subject,
+    name:item.assignmentTitle || "Assignment",
+    subject:item.subject || "Subject",
     myGrade:item.myGrade || 0,
     classAverage:item.classAverage || 0
    }));
@@ -272,7 +267,7 @@ function StudentGrades(){
  const subjectChart =
   filteredSubjects
    .map((item)=>({
-    name:`${item.subject} (${item.classSection})`,
+    name:`${item.subject || "Subject"} (${item.classSection || "Class"})`,
     myAverage:item.myAverage || 0,
     classAverage:item.classAverage || 0
    }));
@@ -452,7 +447,10 @@ function StudentGrades(){
      {
       assignmentChart.length
       ? (
-       <ResponsiveContainer>
+       <ResponsiveContainer
+        width="100%"
+        height="100%"
+       >
         <BarChart data={assignmentChart}>
          <CartesianGrid strokeDasharray="3 3" />
          <XAxis
@@ -490,28 +488,34 @@ function StudentGrades(){
      {
       subjectChart.length
       ? (
-       <ResponsiveContainer>
-        <RadarChart data={subjectChart}>
-         <PolarGrid />
-         <PolarAngleAxis dataKey="name" />
-         <PolarRadiusAxis domain={[0,100]} />
-         <Radar
-          name="My Average"
-          dataKey="myAverage"
-          stroke="#008C95"
-          fill="#008C95"
-          fillOpacity={0.35}
+       <ResponsiveContainer
+        width="100%"
+        height="100%"
+       >
+        <BarChart data={subjectChart}>
+         <CartesianGrid strokeDasharray="3 3" />
+         <XAxis
+          dataKey="name"
+          tick={{
+           fontSize:12
+          }}
          />
-         <Radar
-          name="Class Average"
-          dataKey="classAverage"
-          stroke="#64748B"
-          fill="#64748B"
-          fillOpacity={0.18}
-         />
-         <Legend />
+         <YAxis domain={[0,100]} />
          <Tooltip />
-        </RadarChart>
+         <Legend />
+         <Bar
+          dataKey="classAverage"
+          name="Class Average"
+          fill="#94A3B8"
+          radius={[8,8,0,0]}
+         />
+         <Bar
+          dataKey="myAverage"
+          name="My Average"
+          fill="#008C95"
+          radius={[8,8,0,0]}
+         />
+        </BarChart>
        </ResponsiveContainer>
       )
       : <EmptyChart />
@@ -525,7 +529,10 @@ function StudentGrades(){
      {
       peerRows.length
       ? (
-       <ResponsiveContainer>
+       <ResponsiveContainer
+        width="100%"
+        height="100%"
+       >
         <BarChart
          layout="vertical"
          data={peerRows}
@@ -561,7 +568,10 @@ function StudentGrades(){
      {
       assignmentChart.length
       ? (
-       <ResponsiveContainer>
+       <ResponsiveContainer
+        width="100%"
+        height="100%"
+       >
         <LineChart data={assignmentChart}>
          <CartesianGrid strokeDasharray="3 3" />
          <XAxis dataKey="name" />

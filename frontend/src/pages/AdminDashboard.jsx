@@ -198,11 +198,11 @@ function AdminDashboard() {
         <StatCard
           title="Submissions"
           value={stats.submissions}
-          subtitle={`${stats.assignments} assignments created`}
+          subtitle="Student work turned in"
           icon={Users}
-          actionLabel="Open assignments"
+          actionLabel="Open analytics"
           onClick={()=>
-            navigate("/admin/assignments")
+            navigate("/admin/analytics")
           }
         />
 

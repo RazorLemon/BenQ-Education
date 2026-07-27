@@ -93,11 +93,6 @@ const AdminAnalytics =
     import("./pages/AdminAnalytics")
   );
 
-const AdminAssignments =
-  lazy(()=>
-    import("./pages/AdminAssignments")
-  );
-
 const AdminLogs =
   lazy(()=>
     import("./pages/AdminAnnouncements")
@@ -264,16 +259,6 @@ function App() {
   protectedElement(
    <StudentProfile />,
    ["STUDENT"]
-  )
- }
-/>
-
-        <Route
- path="/admin/assignments"
- element={
-  protectedElement(
-   <AdminAssignments />,
-   ["ADMIN"]
   )
  }
 />

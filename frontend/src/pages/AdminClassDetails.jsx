@@ -12,7 +12,6 @@ from "react-router-dom";
 
 import {
   BarChart3,
-  BookOpen,
   UserRoundCheck,
   Users
 }
@@ -149,7 +148,7 @@ function AdminClassDetails() {
     <div
      className="
      grid
-     md:grid-cols-4
+      md:grid-cols-3
      gap-6
      mb-8
      "
@@ -169,19 +168,6 @@ function AdminClassDetails() {
      />
 
      <StatCard
-      title="Assignments"
-      value={
-       data.assignmentCount
-      }
-      subtitle="Assignments created for this class"
-      icon={BookOpen}
-      actionLabel="View assignments"
-      onClick={()=>
-       scrollToSection("admin-class-assignments")
-      }
-     />
-
-     <StatCard
       title="Average Grade"
       value={
        data.averageGrade
@@ -190,7 +176,7 @@ function AdminClassDetails() {
       icon={BarChart3}
       actionLabel="Open analytics"
       onClick={()=>
-       scrollToSection("admin-class-assignments")
+       scrollToSection("admin-class-students")
       }
      />
 
@@ -314,88 +300,6 @@ function AdminClassDetails() {
            .classSection ||
            "Not set"
           }
-         </div>
-
-        </div>
-
-       )
-      )
-
-     }
-
-    </div>
-
-    <div
-     id="admin-class-assignments"
-     className="
-     bg-white
-     rounded-3xl
-     shadow-md
-     p-6
-     scroll-mt-24
-     "
-    >
-
-     <h2
-      className="
-      text-xl
-      font-bold
-      mb-4
-      "
-     >
-      Assignments
-     </h2>
-
-     {
-
-      data.class
-      .assignments
-      .map(
-       assignment=>(
-
-        <div
-
-         key={
-          assignment.id
-         }
-
-         className="
-         border-b
-         py-3
-         "
-
-        >
-
-         <div
-          className="
-          font-semibold
-          "
-         >
-          {
-           assignment.title
-          }
-         </div>
-
-         <div
-          className="
-          text-sm
-          text-gray-500
-          "
-         >
-
-          Due:
-
-          {" "}
-
-          {
-
-           new Date(
-            assignment.dueDate
-           )
-           .toLocaleDateString()
-
-          }
-
          </div>
 
         </div>

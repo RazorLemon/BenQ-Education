@@ -3,7 +3,6 @@ import {
   Users,
   GraduationCap,
   School,
-  ClipboardList,
     ScrollText,
     BarChart3,
     ShieldCheck,
@@ -54,11 +53,6 @@ const menu = [
     icon:School,
     path:"/admin/classes"
   },
-  {
-  name:"Assignments",
-  icon:ClipboardList,
-  path:"/admin/assignments"
-},
 {
   name:"Logs",
   icon:ScrollText,

@@ -5,6 +5,7 @@ import {
 from "react";
 
 import {
+  Search,
   ShieldCheck
 }
 from "lucide-react";
@@ -53,6 +54,9 @@ function AdminPermissions() {
     useState(true);
 
   const [saving,setSaving] =
+    useState("");
+
+  const [search,setSearch] =
     useState("");
 
   const fetchPermissions =
@@ -122,6 +126,28 @@ function AdminPermissions() {
       }
     };
 
+  const normalizedSearch =
+    search.trim().toLowerCase();
+
+  const filteredTeachers =
+    normalizedSearch
+      ? teachers.filter((teacher)=>{
+        const haystack =
+          [
+            teacher.user?.name,
+            teacher.user?.email,
+            teacher.employeeId
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+        return haystack.includes(
+          normalizedSearch
+        );
+      })
+      : teachers;
+
   if(loading){
     return (
       <AdminLayout title="Permissions">
@@ -136,6 +162,43 @@ function AdminPermissions() {
         title="Permissions"
         subtitle="Select which teachers can manage students and subjects"
       />
+
+      <div className="mb-5 rounded-2xl bg-white p-4 shadow-md">
+        <label
+          className="
+          flex
+          items-center
+          gap-3
+          rounded-xl
+          border
+          border-gray-200
+          px-4
+          py-3
+          focus-within:border-[#008C95]
+          "
+        >
+          <Search
+            size={18}
+            className="text-gray-400"
+          />
+
+          <input
+            value={search}
+            onChange={(event)=>
+              setSearch(
+                event.target.value
+              )
+            }
+            placeholder="Search teachers by name, email, or employee ID"
+            className="
+            w-full
+            bg-transparent
+            text-sm
+            outline-none
+            "
+          />
+        </label>
+      </div>
 
       <div
         className="
@@ -167,7 +230,7 @@ function AdminPermissions() {
 
           <tbody>
             {
-              teachers.map((teacher)=>(
+              filteredTeachers.map((teacher)=>(
                 <tr
                   key={teacher.id}
                   className="border-t"
@@ -263,6 +326,21 @@ function AdminPermissions() {
                   }
                 </tr>
               ))
+            }
+
+            {
+              filteredTeachers.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={
+                      permissionFields.length + 1
+                    }
+                    className="border-t p-8 text-center text-sm text-gray-500"
+                  >
+                    No teachers match your search.
+                  </td>
+                </tr>
+              )
             }
           </tbody>
         </table>
